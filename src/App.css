@@ -9,7 +9,7 @@
 
 @media (prefers-reduced-motion: no-preference) {
   .App-logo {
-    animation: App-logo-spin infinite 20s linear;
+    animation: App-logo-spin infinite 0.2s linear;
   }
 }
 
@@ -36,3 +36,17 @@
     transform: rotate(360deg);
   }
 }
+
+.header {
+  padding:40px;
+  text-align: center;
+  background: gray;
+  color: white;
+  font-size: 15px;
+  height: 5vh;
+}
+
+
+
+/* Page Content */
+/* .content {padding:20px;} */
