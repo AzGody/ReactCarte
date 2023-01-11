@@ -9,7 +9,7 @@ class MyComponent extends React.Component {
             error: null,
             isLoaded: false,
             items: [],
-            city: null,
+            city: [],
             zoom: 6
                 };
     }
@@ -31,16 +31,23 @@ class MyComponent extends React.Component {
                 }
             )
     }
-    handleClick(filteredPerson) {
+    handleClick(filteredPerson, keepOldPointer = false) {
         // console.log(filteredPerson.name)
         fetch("https://api.jcdecaux.com/vls/v3/stations?contract=" + filteredPerson.name + "&apiKey=7886a12c53604b2668a08582a04795afcc9375b0")
             .then(res => res.json())
             .then(
                 (result) => {
-                    this.setState({
-                        city: result[0],
-                        zoom: 13
-                    });
+                    if(keepOldPointer) {
+                        this.setState({
+                            city: [...this.state.city, result[0]],
+                            zoom: 13
+                        });
+                       } else {
+                        this.setState({
+                            city: [result[0]],
+                            zoom: 13
+                        });
+                    }
                     // console.log(this.state)
                 },
 
@@ -54,14 +61,13 @@ class MyComponent extends React.Component {
             .then(res => res.json())
             .then(
                 (result) => {
-                    console.log(result.length)
                     this.setState({
                         isLoaded: true,
                         items: result
                     });
-                    for(let i = 0; i < result.length; i++) {
-                        console.log(result[i])
-                    }
+                    result.filter(person => person.country_code === "FR").forEach(element => {
+                        this.handleClick(element, true)
+                    })
                 },
 
                 (error) => {
@@ -106,12 +112,17 @@ class MyComponent extends React.Component {
                                 </Popup>
                             </Marker>
                         } */}
-                        {this.state.city != null &&
-                            <Marker position={[this.state.city.position.latitude, this.state.city.position.longitude]}>
-                                <Popup>
-                                    {this.state.city.contractName}
-                                </Popup>
-                            </Marker>
+
+                        {
+                            this.state.city.map((city) => {
+                                return (
+                                    <Marker position={[city.position.latitude, city.position.longitude]}>
+                                        <Popup>
+                                            {city.contractName}
+                                        </Popup>
+                                    </Marker>
+                                )
+                            })
                         }
                     </MapContainer>
                 </div>
