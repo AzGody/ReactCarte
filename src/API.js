@@ -1,6 +1,7 @@
 import React from 'react';
+import ReactHtmlParser from 'react-html-parser';
 import './API.css';
-import { MapContainer, TileLayer, useMap, Marker, Popup } from "react-leaflet";
+import {MapContainer, TileLayer, useMap, Marker, Popup} from "react-leaflet";
 
 class MyComponent extends React.Component {
     constructor(props) {
@@ -9,42 +10,36 @@ class MyComponent extends React.Component {
             error: null,
             isLoaded: false,
             items: [],
-            city: [],
+            markers: [],
             zoom: 6
-                };
+        };
     }
-    handleClick(filteredPerson) {
-        console.log(filteredPerson.name)
-        fetch("https://api.jcdecaux.com/vls/v3/stations?contract=" + filteredPerson.name + "&apiKey=7886a12c53604b2668a08582a04795afcc9375b0")
-            .then(res => res.json())
-            .then(
-                (result) => {
-                    this.setState({
-                        city: result[0],
-                        zoom: 13
-                    });
-                    // console.log(this.state)
-                },
 
-                (error) => {
-                    console.log(error)
-                }
-            )
-    }
-    handleClick(filteredPerson, keepOldPointer = false) {
+    handleCityClick(filteredPerson, keepOldPointer = false) {
         // console.log(filteredPerson.name)
         fetch("https://api.jcdecaux.com/vls/v3/stations?contract=" + filteredPerson.name + "&apiKey=7886a12c53604b2668a08582a04795afcc9375b0")
             .then(res => res.json())
             .then(
                 (result) => {
-                    if(keepOldPointer) {
+                    if (keepOldPointer) {
+                        console.log(result);
                         this.setState({
-                            city: [...this.state.city, result[0]],
+                            markers: [...this.state.markers, {
+                                position: result[0].position,
+                                popup: `
+                                    <div>
+                                        <div>${result[0].contractName}</div>
+                                        <button onClick={() => this.handleContractClick(${JSON.stringify(result)})}>
+                                            Voir le contrat
+                                        </button>
+                                    </div>`,
+                                data: result
+                            }],
                             zoom: 13
                         });
-                       } else {
+                    } else {
                         this.setState({
-                            city: [result[0]],
+                            markers: [result[0]],
                             zoom: 13
                         });
                     }
@@ -56,6 +51,7 @@ class MyComponent extends React.Component {
                 }
             )
     }
+
     componentDidMount() {
         fetch("https://api.jcdecaux.com/vls/v3/contracts?apiKey=7886a12c53604b2668a08582a04795afcc9375b0")
             .then(res => res.json())
@@ -66,7 +62,7 @@ class MyComponent extends React.Component {
                         items: result
                     });
                     result.filter(person => person.country_code === "FR").forEach(element => {
-                        this.handleClick(element, true)
+                        this.handleCityClick(element, true)
                     })
                 },
 
@@ -79,9 +75,13 @@ class MyComponent extends React.Component {
             )
     }
 
+    handleContractClick(filteredContract) {
+        console.log(filteredContract)
+    }
+
     render() {
         // console.log(items)
-        const { error, isLoaded, items } = this.state;
+        const {error, isLoaded, items} = this.state;
         if (error) {
             return <div>Error: {error.message}</div>;
         } else if (!isLoaded) {
@@ -94,7 +94,8 @@ class MyComponent extends React.Component {
 
                         <div class="btn-group">
                             {items.filter(person => person.country_code === "FR").map(filteredPerson => (
-                                <button class="button-cities" key={filteredPerson.name} onClick={() => this.handleClick(filteredPerson)} >
+                                <button class="button-cities" key={filteredPerson.name}
+                                        onClick={() => this.handleCityClick(filteredPerson, false)}>
                                     {filteredPerson.name}
                                 </button>
                             ))}
@@ -105,20 +106,12 @@ class MyComponent extends React.Component {
                             attribution='&copy; <a href="https://www.openstreetmap.org/copyright%22%3EOpenStreetMap</a> contributors'
                             url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
                         />
-                        {/* {this.state.city += null &&
-                            <Marker position={[this.state.city.position.latitude, this.state.city.position.longitude]}>
-                                <Popup>
-                                    A pretty CSS3 popup. <br /> Easily customizable.
-                                </Popup>
-                            </Marker>
-                        } */}
-
                         {
-                            this.state.city.map((city) => {
+                            this.state.markers.map((marker) => {
                                 return (
-                                    <Marker position={[city.position.latitude, city.position.longitude]}>
+                                    <Marker position={[marker.position.latitude, marker.position.longitude]}>
                                         <Popup>
-                                            {city.contractName}
+                                            {ReactHtmlParser(marker.popup)}
                                         </Popup>
                                     </Marker>
                                 )
@@ -128,6 +121,6 @@ class MyComponent extends React.Component {
                 </div>
             );
         }
-    }
-}
-export default MyComponent;
+        }
+        }
+        export default MyComponent;
