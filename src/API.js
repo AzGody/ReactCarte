@@ -61,6 +61,17 @@ class MyComponent extends React.Component {
             .then(res => res.json())
             .then(
                 (result) => {
+
+                    var myArray = []
+                    result.forEach(newElement => {
+                        let existingElement = myArray.find(element => element.name === newElement.name);
+                        if (!existingElement) {
+                          myArray.push(newElement);
+                        }
+                      });
+                      console.log(myArray);
+                      
+
                     this.setState({
                         isLoaded: true,
                         items: result
@@ -88,13 +99,13 @@ class MyComponent extends React.Component {
             return <div>Loading...</div>;
         } else {
             return (
-                <div class='wrapper'>
-                    <div class="div-right-cities">
+                <div className='wrapper'>
+                    <div className="div-right-cities">
                         <h1>Toutes les villes ayant un contrat</h1>
 
-                        <div class="btn-group">
+                        <div className="btn-group">
                             {items.filter(person => person.country_code === "FR").map(filteredPerson => (
-                                <button class="button-cities" key={filteredPerson.name} onClick={() => this.handleClick(filteredPerson)} >
+                                <button className="button-cities" key={filteredPerson.name} onClick={() => this.handleClick(filteredPerson)} >
                                     {filteredPerson.name}
                                 </button>
                             ))}

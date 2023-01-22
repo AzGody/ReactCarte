@@ -7,7 +7,7 @@ function App() {
   
   return (
     <div>
-      <div class="header">
+      <div className="header">
         <h1>Projet React</h1>
         {/* <p>My supercool header</p> */}
       </div>
