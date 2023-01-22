@@ -61,17 +61,6 @@ class MyComponent extends React.Component {
             .then(res => res.json())
             .then(
                 (result) => {
-
-                    var myArray = []
-                    result.forEach(newElement => {
-                        let existingElement = myArray.find(element => element.name === newElement.name);
-                        if (!existingElement) {
-                          myArray.push(newElement);
-                        }
-                      });
-                      console.log(myArray);
-                      
-
                     this.setState({
                         isLoaded: true,
                         items: result
